@@ -1,0 +1,22 @@
+Thumbnail me 4
+==============
+
+Thumbnail me 4 is free software.
+
+SPDX-License-Identifier: GPL-2.0-or-later
+
+This project is released under the GNU General Public License version 2
+or, at your option, any later version.
+
+A copy of the GNU GPL version 2 is provided in:
+  dist_files/licenses/GPL-2.0-or-later.txt
+
+Binary distributions also include third-party components with their own
+licenses. See:
+  NOTICE.md
+  dist_files/licenses/README_LICENSES.txt
+  dist_files/licenses/THIRD_PARTY_NOTICES.txt
+
+This license statement covers the Thumbnail me 4 application source code.
+Third-party libraries, Qt plugins, FFmpeg DLLs, MediaInfo DLLs and the
+original Thumbnail me assets remain under their respective licenses.

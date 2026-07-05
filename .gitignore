@@ -1,0 +1,39 @@
+# Build / release output
+build/
+dist/
+release/
+debug/
+
+# Generated packages
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+
+# CMake / build files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+Makefile.*
+
+# Visual Studio / Qt Creator
+.vs/
+*.user
+*.suo
+*.vcxproj.user
+
+# Runtime / local settings
+settings.ini
+output/
+logs/
+
+# Windows metadata
+*:Zone.Identifier*
+Thumbs.db
+Desktop.ini
+
+# Logs / temporary files
+*.log
+*.tmp

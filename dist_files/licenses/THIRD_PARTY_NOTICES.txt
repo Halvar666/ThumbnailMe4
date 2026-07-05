@@ -1,0 +1,67 @@
+Third-party notices for Thumbnail me 4
+======================================
+
+Thumbnail me 4 may redistribute the following third-party components in
+Windows ZIP builds.
+
+Qt
+--
+This application uses Qt 6 dynamically.
+
+Qt is copyright The Qt Company Ltd. and other contributors.
+Qt is available under commercial and open-source licensing terms.
+The open-source path relevant to this project is LGPL/GPL licensing.
+
+Qt Image Formats
+----------------
+The Windows ZIP package may include Qt Image Formats plugins under:
+
+  imageformats/
+
+WebP support is provided by:
+
+  imageformats/qwebp.dll
+
+Qt Image Formats WebP support uses libwebp, which Qt documents as
+BSD 3-clause licensed.
+
+FFmpeg
+------
+This application links to FFmpeg shared libraries for probing and decoding
+video frames.
+
+FFmpeg is a trademark of Fabrice Bellard, originator of the FFmpeg project.
+FFmpeg libraries are licensed as LGPL-2.1-or-later or GPL-2.0-or-later,
+depending on the build options and enabled components.
+
+The current development setup uses BtbN FFmpeg GPL shared binaries, so public
+binary packages should treat the redistributed FFmpeg DLLs as GPL-covered
+unless the package is intentionally switched to a verified LGPL-only build.
+
+MediaInfo / MediaInfoLib
+------------------------
+MediaInfo is loaded dynamically when present. When absent, Thumbnail me 4
+falls back to FFmpeg-derived metadata.
+
+Required binary redistribution notice:
+
+  This product uses MediaInfo library, Copyright (c) 2002-2026
+  MediaArea.net SARL.
+
+libwebp
+-------
+WebP support through Qt Image Formats uses libwebp.
+
+License: BSD 3-clause "New" or "Revised" License.
+
+Original Thumbnail me material
+------------------------------
+The icon file resources/Thumbnailme.ico is kept from the original Thumbnail
+me 3.0 package. Keep it in the original project/GPL-compatible redistribution
+context.
+
+No endorsement
+--------------
+Thumbnail me 4 is not endorsed by Qt, FFmpeg, MediaArea, libwebp contributors,
+Microsoft, or the original Thumbnail me authors unless explicitly stated by
+those parties.
