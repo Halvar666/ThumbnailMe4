@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableExtensions
 
-rem Thumbnail me 4b1 - Windows x64 ZIP release builder.
+rem Thumbnail me 4b2 - Windows x64 ZIP release builder.
 rem Run from the project root or directly from tools.
 rem Requires:
 rem   build\ThumbnailMe4.exe
@@ -14,8 +14,8 @@ rem   or MediaInfo DLL files already copied in build\
 
 cd /d "%~dp0\.."
 
-set RELEASE_VERSION=4b1
-set RELEASE_BASENAME=ThumbnailMe4-4b1-win64
+set RELEASE_VERSION=4b2
+set RELEASE_BASENAME=ThumbnailMe4-4b2-win64
 set BUILD_DIR=%CD%\build
 set DIST_ROOT=%CD%\dist
 set DIST_DIR=%DIST_ROOT%\%RELEASE_BASENAME%
@@ -58,8 +58,12 @@ echo Copying EXE files...
 copy /Y "%BUILD_DIR%\ThumbnailMe4.exe" "%DIST_DIR%\" >nul
 copy /Y "%BUILD_DIR%\ThumbnailMeWorker.exe" "%DIST_DIR%\" >nul
 
-echo Copying FFmpeg DLL files...
-copy /Y "%FFMPEG_ROOT%\bin\*.dll" "%DIST_DIR%\" >nul
+echo Copying minimal FFmpeg runtime DLL set...
+powershell -NoProfile -ExecutionPolicy Bypass -File "%CD%\tools\copy_ffmpeg_runtime_deps.ps1" -FFmpegBin "%FFMPEG_ROOT%\bin" -DestDir "%DIST_DIR%"
+if errorlevel 1 (
+    echo ERROR: FFmpeg runtime dependency copy failed.
+    exit /b 1
+)
 
 echo Copying MediaInfo DLL files...
 if defined MEDIAINFO_ROOT (
@@ -107,7 +111,9 @@ if "%QT_IMAGEFORMATS%"=="" (
 
 if not "%QT_IMAGEFORMATS%"=="" (
     mkdir "%DIST_DIR%\imageformats" >nul 2>nul
-    copy /Y "%QT_IMAGEFORMATS%\*.dll" "%DIST_DIR%\imageformats\" >nul
+    for %%P in (qjpeg.dll qwebp.dll qpng.dll) do (
+        if exist "%QT_IMAGEFORMATS%\%%P" copy /Y "%QT_IMAGEFORMATS%\%%P" "%DIST_DIR%\imageformats\" >nul
+    )
 ) else (
     echo WARNING: Qt imageformats plugin folder not found. WebP output may not work.
 )
@@ -115,6 +121,17 @@ if not "%QT_IMAGEFORMATS%"=="" (
 if defined QT_BIN (
     if exist "%QT_BIN%\*webp*.dll" copy /Y "%QT_BIN%\*webp*.dll" "%DIST_DIR%\" >nul
     if exist "%QT_BIN%\*sharpyuv*.dll" copy /Y "%QT_BIN%\*sharpyuv*.dll" "%DIST_DIR%\" >nul
+)
+
+if exist "%DIST_DIR%\imageformats" (
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "$dir='%DIST_DIR%\imageformats'; $keep=@('qjpeg.dll','qwebp.dll','qpng.dll'); Get-ChildItem -LiteralPath $dir -Filter '*.dll' -File | Where-Object { $keep -notcontains $_.Name } | Remove-Item -Force"
+)
+
+echo Copying app-local MSVC runtime DLLs...
+powershell -NoProfile -ExecutionPolicy Bypass -File "%CD%\tools\copy_msvc_runtime_deps.ps1" -DestDir "%DIST_DIR%"
+if errorlevel 1 (
+    echo ERROR: MSVC runtime dependency copy failed.
+    exit /b 1
 )
 
 echo Copying Windows ZIP docs, licenses and default settings...
@@ -128,6 +145,26 @@ if exist "%CD%\dist_files\settings.ini.example" (
 if exist "%CD%\dist_files\licenses" (
     xcopy /E /I /Y "%CD%\dist_files\licenses" "%DIST_DIR%\licenses" >nul
 )
+
+echo.
+echo Removing non-runtime leftovers if present...
+del /Q "%DIST_DIR%\*.pdb" >nul 2>nul
+del /Q "%DIST_DIR%\*.lib" >nul 2>nul
+del /Q "%DIST_DIR%\*.exp" >nul 2>nul
+del /Q "%DIST_DIR%\ffmpeg.exe" >nul 2>nul
+del /Q "%DIST_DIR%\ffprobe.exe" >nul 2>nul
+del /Q "%DIST_DIR%\ffplay.exe" >nul 2>nul
+
+rem Qt/windeployqt may bundle DirectX shader compiler files for broader
+rem graphics/QML scenarios. Thumbnail me 4 is a classic Qt Widgets app and
+rem does not use them directly; tested for the beta 2 package without these files.
+del /Q "%DIST_DIR%\d3dcompiler_47.dll" >nul 2>nul
+del /Q "%DIST_DIR%\dxcompiler.dll" >nul 2>nul
+del /Q "%DIST_DIR%\dxil.dll" >nul 2>nul
+
+rem Do not bundle the Visual C++ Redistributable installer in the ZIP.
+rem Required MSVC runtime DLLs are copied app-locally by copy_msvc_runtime_deps.ps1.
+del /Q "%DIST_DIR%\vc_redist.x64.exe" >nul 2>nul
 
 echo.
 echo Windows ZIP folder created:
@@ -145,5 +182,9 @@ if exist "%DIST_ZIP%" (
 ) else (
     echo WARNING: ZIP was not created, but Windows ZIP folder exists.
 )
+
+echo.
+echo Running package size audit...
+powershell -NoProfile -ExecutionPolicy Bypass -File "%CD%\tools\audit_windows_package_size.ps1" -DistDir "%DIST_DIR%" -Top 40
 
 endlocal

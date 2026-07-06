@@ -67,7 +67,7 @@ For every public binary release:
 Recommended Windows ZIP layout
 ---------------------------
 
-ThumbnailMe4-4b1-win64/
+ThumbnailMe4-4b2-win64/
   ThumbnailMe4.exe
   ThumbnailMeWorker.exe
   LICENSE.txt

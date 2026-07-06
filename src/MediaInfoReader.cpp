@@ -190,6 +190,44 @@ namespace
         return cleanUnitString(formatted);
     }
 
+    bool containsDigit(const QString &value)
+    {
+        for (const QChar ch : value) {
+            if (ch.isDigit()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    QString streamBitrateText(
+        const MediaInfoApi &api,
+        MediaInfoHandle handle,
+        size_t streamKind,
+        size_t index
+    )
+    {
+        const QString raw = firstNonEmpty({
+            getValue(api, handle, streamKind, index, L"BitRate"),
+            getValue(api, handle, streamKind, index, L"BitRate_Nominal"),
+            getValue(api, handle, streamKind, index, L"BitRate_Maximum")
+        });
+
+        const QString formatted = firstNonEmpty({
+            getValue(api, handle, streamKind, index, L"BitRate/String"),
+            getValue(api, handle, streamKind, index, L"BitRate_Nominal/String"),
+            getValue(api, handle, streamKind, index, L"BitRate_Maximum/String")
+        });
+
+        const QString text = rawOrFormattedBitrate(raw, formatted).trimmed();
+        if (!containsDigit(text)) {
+            return QString();
+        }
+
+        return text;
+    }
+
     QString samplingRateText(const QString &raw, const QString &formatted)
     {
         const int hz = intValue(raw);
@@ -297,6 +335,11 @@ namespace
             parts << format.toLower();
         }
 
+        const QString bitrate = streamBitrateText(api, handle, Stream_Audio, index);
+        if (!bitrate.isEmpty()) {
+            parts << bitrate;
+        }
+
         const QString samplingRate = samplingRateText(
             getValue(api, handle, Stream_Audio, index, L"SamplingRate"),
             getValue(api, handle, Stream_Audio, index, L"SamplingRate/String")
@@ -354,6 +397,11 @@ namespace
                 codec += " " + videoProfile;
             }
             parts << codec;
+        }
+
+        const QString videoBitrate = streamBitrateText(api, handle, Stream_Video, 0);
+        if (!videoBitrate.isEmpty()) {
+            parts << videoBitrate;
         }
 
         if (!fallbackInfo.pixelFormatName.isEmpty() && fallbackInfo.pixelFormatName != "unknown") {

@@ -11,6 +11,9 @@ Thumbnail me 4 source code is distributed under:
 
 ## Original Thumbnail me material
 
+The original Thumbnail me project was created by Rousseau Quentin / kwent.
+Original repository: https://github.com/kwent/thumbnailme
+
 The application name and concept are derived from the original Thumbnail me
 project. The current application icon (`resources/Thumbnailme.ico`) is kept
 from the original Thumbnail me 3.0 package and should be redistributed only

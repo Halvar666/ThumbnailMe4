@@ -9,7 +9,7 @@ cd /d "%~dp0\.."
 
 set DIST_ROOT=%CD%\dist
 set STAGE_ROOT=%DIST_ROOT%\_sourceziproot
-set SOURCE_NAME=ThumbnailMe4-4b1-source
+set SOURCE_NAME=ThumbnailMe4-4b2-source
 set SOURCE_STAGE=%STAGE_ROOT%\%SOURCE_NAME%
 set SOURCE_ZIP=%DIST_ROOT%\%SOURCE_NAME%.zip
 
