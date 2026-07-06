@@ -33,6 +33,17 @@ The current development target is Windows with:
 - FFmpeg shared libraries
 - MediaInfo DLL
 
+## Credits
+
+Thumbnail me 4 is a modern continuation and direct GPL-compatible fork of the original **Thumbnail me** project.
+
+Original Thumbnail me project:
+- Created by **Rousseau Quentin** / **kwent**
+- Original repository: https://github.com/kwent/thumbnailme
+
+Many thanks to Quentin Rousseau and the original Thumbnail me contributors for making the project available as free software.
+- 
+
 ## License
 
 Thumbnail me 4 is released under the GNU GPL:
