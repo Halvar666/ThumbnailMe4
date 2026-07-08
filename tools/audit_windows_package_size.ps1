@@ -1,36 +1,62 @@
 param(
-    [Parameter(Mandatory=$true)][string]$DistDir,
-    [int]$Top = 60
+    [string]$Folder,
+    [string]$Zip
 )
 
 $ErrorActionPreference = 'Stop'
-$DistDir = (Resolve-Path -LiteralPath $DistDir).Path
 
-$files = Get-ChildItem -LiteralPath $DistDir -Recurse -File -Force
+if (-not $Folder) { $Folder = Join-Path (Get-Location) 'dist\ThumbnailMe4-4b2q-win64' }
+if (-not $Zip) { $Zip = Join-Path (Get-Location) 'dist\ThumbnailMe4-4b2q-win64.zip' }
+
+if (-not (Test-Path -LiteralPath $Folder)) {
+    throw "Folder does not exist: $Folder"
+}
+
+$files = Get-ChildItem -LiteralPath $Folder -Recurse -File
 $total = ($files | Measure-Object Length -Sum).Sum
-if ($null -eq $total) { $total = 0 }
+if (-not $total) { $total = 0 }
+
+function MiB([long]$bytes) { [math]::Round($bytes / 1MB, 2) }
 
 Write-Host ''
 Write-Host 'Package size audit'
 Write-Host '=================='
-Write-Host ("Folder: {0}" -f $DistDir)
-Write-Host ("Files:  {0}" -f $files.Count)
-Write-Host ("Total:  {0:N2} MiB" -f ($total / 1MB))
+Write-Host "Folder: $Folder"
+Write-Host "Files:  $($files.Count)"
+Write-Host "Total:  $(MiB $total) MiB"
 Write-Host ''
-Write-Host ("Top {0} largest files:" -f $Top)
-$files | Sort-Object Length -Descending | Select-Object -First $Top @{Name='MiB';Expression={[math]::Round($_.Length / 1MB, 2)}}, @{Name='Path';Expression={$_.FullName.Substring($DistDir.Length + 1)}} | Format-Table -AutoSize
+Write-Host 'Top 60 largest files:'
+Write-Host ''
+Write-Host '  MiB Path'
+Write-Host '  --- ----'
 
-$ffmpeg = $files | Where-Object { $_.Name -match '^(avcodec|avformat|avutil|swscale|swresample|avfilter|avdevice|postproc)-.*\.dll$' -or $_.Name -match '^(lib|zlib|bz2|iconv|intl|lzma|xml2|x264|x265|vpx|aom|dav1d|openh264|svt|Svt|zimg|shaderc|spirv|vulkan).+\.dll$' }
-if ($ffmpeg) {
-    $ffTotal = ($ffmpeg | Measure-Object Length -Sum).Sum
-    Write-Host ''
-    Write-Host ("Probable FFmpeg/runtime DLLs: {0} files, {1:N2} MiB" -f $ffmpeg.Count, ($ffTotal / 1MB))
-    $ffmpeg | Sort-Object Length -Descending | Select-Object @{Name='MiB';Expression={[math]::Round($_.Length / 1MB, 2)}}, Name | Format-Table -AutoSize
+$files |
+    Sort-Object Length -Descending |
+    Select-Object -First 60 |
+    ForEach-Object {
+        $rel = Resolve-Path -LiteralPath $_.FullName -Relative
+        $rel = $rel -replace '^\.\\',''
+        '{0,5} {1}' -f (MiB $_.Length), $rel
+    }
+
+$ff = $files | Where-Object { $_.Name -match '^(avcodec|avformat|avutil|swscale|swresample)-.*\.dll$' }
+$ffTotal = ($ff | Measure-Object Length -Sum).Sum
+if (-not $ffTotal) { $ffTotal = 0 }
+
+Write-Host ''
+Write-Host "Probable FFmpeg/runtime DLLs: $($ff.Count) files, $(MiB $ffTotal) MiB"
+Write-Host ''
+Write-Host ' MiB Name'
+Write-Host ' --- ----'
+$ff | Sort-Object Length -Descending | ForEach-Object {
+    '{0,4} {1}' -f (MiB $_.Length), $_.Name
 }
 
-$zip = Join-Path (Split-Path $DistDir -Parent) ((Split-Path $DistDir -Leaf) + '.zip')
-if (Test-Path -LiteralPath $zip) {
-    $zipItem = Get-Item -LiteralPath $zip
+if (Test-Path -LiteralPath $Zip) {
+    $zipItem = Get-Item -LiteralPath $Zip
     Write-Host ''
-    Write-Host ("ZIP:    {0:N2} MiB" -f ($zipItem.Length / 1MB))
+    Write-Host "ZIP:    $(MiB $zipItem.Length) MiB"
+} else {
+    Write-Host ''
+    Write-Host "ZIP:    missing ($Zip)"
 }

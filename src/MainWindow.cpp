@@ -8,6 +8,7 @@
 #include "VideoTypes.h"
 
 #include <QApplication>
+#include <QByteArray>
 #include <QAbstractItemView>
 #include <QAction>
 #include <QCheckBox>
@@ -38,12 +39,17 @@
 #include <QPushButton>
 #include <QResizeEvent>
 #include <QSettings>
+#include <QStandardPaths>
 #include <QSpinBox>
 #include <QSplitter>
 #include <QStatusBar>
 #include <QTabWidget>
 #include <QVBoxLayout>
 #include <QWidget>
+
+#if defined(Q_OS_LINUX)
+extern "C" const char ThumbnailMe4PersistentConfigEnvMarker[] = "THUMBNAILME4_CONFIG_DIR";
+#endif
 
 namespace
 {
@@ -56,7 +62,7 @@ namespace
         static const QHash<QString, QString> cs = {
             {"%1 rows × %2 columns", "%1 řádků × %2 sloupců"},
             {"About", "O aplikaci"},
-            {"About Thumbnail me 4b2", "O Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "O Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Přesný (nejpomalejší)"},
             {"Add and select a video first.", "Nejdřív přidej a vyber video."},
             {"Add video files", "Přidat video soubory"},
@@ -190,7 +196,7 @@ namespace
         static const QHash<QString, QString> fr = {
             {"%1 rows × %2 columns", "%1 lignes × %2 colonnes"},
             {"About", "À propos"},
-            {"About Thumbnail me 4b2", "À propos de Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "À propos de Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Précis (le plus lent)"},
             {"Add and select a video first.", "Ajoutez et sélectionnez d’abord une vidéo."},
             {"Add video files", "Ajouter des fichiers vidéo"},
@@ -324,7 +330,7 @@ namespace
         static const QHash<QString, QString> de = {
             {"%1 rows × %2 columns", "%1 Zeilen × %2 Spalten"},
             {"About", "Über"},
-            {"About Thumbnail me 4b2", "Über Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Über Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Genau (am langsamsten)"},
             {"Add and select a video first.", "Fügen Sie zuerst ein Video hinzu und wählen Sie es aus."},
             {"Add video files", "Videodateien hinzufügen"},
@@ -458,7 +464,7 @@ namespace
         static const QHash<QString, QString> es = {
             {"%1 rows × %2 columns", "%1 filas × %2 columnas"},
             {"About", "Acerca de"},
-            {"About Thumbnail me 4b2", "Acerca de Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Acerca de Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Preciso (más lento)"},
             {"Add and select a video first.", "Añade y selecciona primero un vídeo."},
             {"Add video files", "Añadir archivos de vídeo"},
@@ -592,7 +598,7 @@ namespace
         static const QHash<QString, QString> nl = {
             {"%1 rows × %2 columns", "%1 rijen × %2 kolommen"},
             {"About", "Over"},
-            {"About Thumbnail me 4b2", "Over Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Over Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Nauwkeurig (traagst)"},
             {"Add and select a video first.", "Voeg eerst een video toe en selecteer die."},
             {"Add video files", "Videobestanden toevoegen"},
@@ -726,7 +732,7 @@ namespace
         static const QHash<QString, QString> it = {
             {"%1 rows × %2 columns", "%1 righe × %2 colonne"},
             {"About", "Informazioni"},
-            {"About Thumbnail me 4b2", "Informazioni su Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Informazioni su Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Accurata (più lenta)"},
             {"Add and select a video first.", "Aggiungi e seleziona prima un video."},
             {"Add video files", "Aggiungi file video"},
@@ -860,7 +866,7 @@ namespace
         static const QHash<QString, QString> hu = {
             {"%1 rows × %2 columns", "%1 sor × %2 oszlop"},
             {"About", "Névjegy"},
-            {"About Thumbnail me 4b2", "Thumbnail me 4b2 névjegye"},
+            {"About Thumbnail me 4b2p", "Thumbnail me 4b2p névjegye"},
             {"Accurate (slowest)", "Pontos (leglassabb)"},
             {"Add and select a video first.", "Előbb adj hozzá és válassz ki egy videót."},
             {"Add video files", "Videófájlok hozzáadása"},
@@ -994,7 +1000,7 @@ namespace
         static const QHash<QString, QString> hr = {
             {"%1 rows × %2 columns", "%1 redaka × %2 stupca"},
             {"About", "O programu"},
-            {"About Thumbnail me 4b2", "O programu Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "O programu Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Precizno (najsporije)"},
             {"Add and select a video first.", "Najprije dodajte i odaberite video."},
             {"Add video files", "Dodaj video datoteke"},
@@ -1128,7 +1134,7 @@ namespace
         static const QHash<QString, QString> pt = {
             {"%1 rows × %2 columns", "%1 linhas × %2 colunas"},
             {"About", "Sobre"},
-            {"About Thumbnail me 4b2", "Sobre o Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Sobre o Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Preciso (mais lento)"},
             {"Add and select a video first.", "Adicione e selecione primeiro um vídeo."},
             {"Add video files", "Adicionar ficheiros de vídeo"},
@@ -1262,7 +1268,7 @@ namespace
         static const QHash<QString, QString> zh = {
             {"%1 rows × %2 columns", "%1 行 × %2 列"},
             {"About", "关于"},
-            {"About Thumbnail me 4b2", "关于 Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "关于 Thumbnail me 4b2p"},
             {"Accurate (slowest)", "精确（最慢）"},
             {"Add and select a video first.", "请先添加并选择一个视频。"},
             {"Add video files", "添加视频文件"},
@@ -1396,7 +1402,7 @@ namespace
         static const QHash<QString, QString> ru = {
             {"%1 rows × %2 columns", "%1 строк × %2 столбцов"},
             {"About", "О программе"},
-            {"About Thumbnail me 4b2", "О Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "О Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Точный (самый медленный)"},
             {"Add and select a video first.", "Сначала добавьте и выберите видео."},
             {"Add video files", "Добавить видеофайлы"},
@@ -1530,7 +1536,7 @@ namespace
         static const QHash<QString, QString> bg = {
             {"%1 rows × %2 columns", "%1 реда × %2 колони"},
             {"About", "За програмата"},
-            {"About Thumbnail me 4b2", "За Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "За Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Точен (най-бавен)"},
             {"Add and select a video first.", "Първо добавете и изберете видео."},
             {"Add video files", "Добавяне на видео файлове"},
@@ -1664,7 +1670,7 @@ namespace
         static const QHash<QString, QString> da = {
             {"%1 rows × %2 columns", "%1 rækker × %2 kolonner"},
             {"About", "Om"},
-            {"About Thumbnail me 4b2", "Om Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Om Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Præcis (langsomst)"},
             {"Add and select a video first.", "Tilføj og vælg først en video."},
             {"Add video files", "Tilføj videofiler"},
@@ -1798,7 +1804,7 @@ namespace
         static const QHash<QString, QString> et = {
             {"%1 rows × %2 columns", "%1 rida × %2 veergu"},
             {"About", "Teave"},
-            {"About Thumbnail me 4b2", "Teave Thumbnail me 4b2 kohta"},
+            {"About Thumbnail me 4b2p", "Teave Thumbnail me 4b2p kohta"},
             {"Accurate (slowest)", "Täpne (aeglaseim)"},
             {"Add and select a video first.", "Lisa ja vali esmalt video."},
             {"Add video files", "Lisa videofaile"},
@@ -1932,7 +1938,7 @@ namespace
         static const QHash<QString, QString> el = {
             {"%1 rows × %2 columns", "%1 γραμμές × %2 στήλες"},
             {"About", "Σχετικά"},
-            {"About Thumbnail me 4b2", "Σχετικά με το Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Σχετικά με το Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Ακριβής (πιο αργή)"},
             {"Add and select a video first.", "Προσθέστε και επιλέξτε πρώτα ένα βίντεο."},
             {"Add video files", "Προσθήκη αρχείων βίντεο"},
@@ -2066,7 +2072,7 @@ namespace
         static const QHash<QString, QString> ga = {
             {"%1 rows × %2 columns", "%1 ró × %2 colún"},
             {"About", "Maidir leis"},
-            {"About Thumbnail me 4b2", "Maidir le Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Maidir le Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Cruinn (is moille)"},
             {"Add and select a video first.", "Cuir físeán leis agus roghnaigh é ar dtús."},
             {"Add video files", "Cuir comhaid físe leis"},
@@ -2200,7 +2206,7 @@ namespace
         static const QHash<QString, QString> lv = {
             {"%1 rows × %2 columns", "%1 rindas × %2 kolonnas"},
             {"About", "Par programmu"},
-            {"About Thumbnail me 4b2", "Par Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Par Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Precīzs (vislēnākais)"},
             {"Add and select a video first.", "Vispirms pievienojiet un izvēlieties video."},
             {"Add video files", "Pievienot video failus"},
@@ -2334,7 +2340,7 @@ namespace
         static const QHash<QString, QString> lt = {
             {"%1 rows × %2 columns", "%1 eilutės × %2 stulpeliai"},
             {"About", "Apie"},
-            {"About Thumbnail me 4b2", "Apie Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Apie Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Tikslus (lėčiausias)"},
             {"Add and select a video first.", "Pirmiausia pridėkite ir pasirinkite vaizdo įrašą."},
             {"Add video files", "Pridėti vaizdo failus"},
@@ -2468,7 +2474,7 @@ namespace
         static const QHash<QString, QString> mt = {
             {"%1 rows × %2 columns", "%1 ringieli × %2 kolonni"},
             {"About", "Dwar"},
-            {"About Thumbnail me 4b2", "Dwar Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Dwar Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Preċiż (l-aktar bil-mod)"},
             {"Add and select a video first.", "Żid u agħżel vidjo l-ewwel."},
             {"Add video files", "Żid fajls tal-vidjo"},
@@ -2602,7 +2608,7 @@ namespace
         static const QHash<QString, QString> pl = {
             {"%1 rows × %2 columns", "%1 wierszy × %2 kolumn"},
             {"About", "O programie"},
-            {"About Thumbnail me 4b2", "O Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "O Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Dokładny (najwolniejszy)"},
             {"Add and select a video first.", "Najpierw dodaj i wybierz film."},
             {"Add video files", "Dodaj pliki wideo"},
@@ -2736,7 +2742,7 @@ namespace
         static const QHash<QString, QString> ro = {
             {"%1 rows × %2 columns", "%1 rânduri × %2 coloane"},
             {"About", "Despre"},
-            {"About Thumbnail me 4b2", "Despre Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Despre Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Precis (cel mai lent)"},
             {"Add and select a video first.", "Adaugă și selectează mai întâi un videoclip."},
             {"Add video files", "Adaugă fișiere video"},
@@ -2870,7 +2876,7 @@ namespace
         static const QHash<QString, QString> sk = {
             {"%1 rows × %2 columns", "%1 riadkov × %2 stĺpcov"},
             {"About", "O aplikácii"},
-            {"About Thumbnail me 4b2", "O Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "O Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Presný (najpomalší)"},
             {"Add and select a video first.", "Najprv pridaj a vyber video."},
             {"Add video files", "Pridať video súbory"},
@@ -3004,7 +3010,7 @@ namespace
         static const QHash<QString, QString> sl = {
             {"%1 rows × %2 columns", "%1 vrstic × %2 stolpcev"},
             {"About", "O programu"},
-            {"About Thumbnail me 4b2", "O Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "O Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Natančno (najpočasnejše)"},
             {"Add and select a video first.", "Najprej dodajte in izberite video."},
             {"Add video files", "Dodaj video datoteke"},
@@ -3138,7 +3144,7 @@ namespace
         static const QHash<QString, QString> fi = {
             {"%1 rows × %2 columns", "%1 riviä × %2 saraketta"},
             {"About", "Tietoja"},
-            {"About Thumbnail me 4b2", "Tietoja Thumbnail me 4b2:stä"},
+            {"About Thumbnail me 4b2p", "Tietoja Thumbnail me 4b2p:stä"},
             {"Accurate (slowest)", "Tarkka (hitain)"},
             {"Add and select a video first.", "Lisää ja valitse ensin video."},
             {"Add video files", "Lisää videotiedostoja"},
@@ -3272,7 +3278,7 @@ namespace
         static const QHash<QString, QString> sv = {
             {"%1 rows × %2 columns", "%1 rader × %2 kolumner"},
             {"About", "Om"},
-            {"About Thumbnail me 4b2", "Om Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Om Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Exakt (långsammast)"},
             {"Add and select a video first.", "Lägg till och välj först en video."},
             {"Add video files", "Lägg till videofiler"},
@@ -3406,7 +3412,7 @@ namespace
                 static const QHash<QString, QString> sq = {
             {"%1 rows × %2 columns", "%1 rreshta × %2 kolona"},
             {"About", "Rreth programit"},
-            {"About Thumbnail me 4b2", "Rreth Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Rreth Thumbnail me 4b2p"},
             {"Accurate (slowest)", "I saktë (më i ngadalti)"},
             {"Add and select a video first.", "Shto dhe zgjidh më parë një video."},
             {"Add video files", "Shto skedarë video"},
@@ -3540,7 +3546,7 @@ namespace
                 static const QHash<QString, QString> be = {
             {"%1 rows × %2 columns", "%1 радкоў × %2 слупкоў"},
             {"About", "Пра праграму"},
-            {"About Thumbnail me 4b2", "Пра Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Пра Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Дакладны (самы павольны)"},
             {"Add and select a video first.", "Спачатку дадайце і выберыце відэа."},
             {"Add video files", "Дадаць відэафайлы"},
@@ -3674,7 +3680,7 @@ namespace
                 static const QHash<QString, QString> bs = {
             {"%1 rows × %2 columns", "%1 redaka × %2 stupca"},
             {"About", "O programu"},
-            {"About Thumbnail me 4b2", "O Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "O Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Precizno (najsporije)"},
             {"Add and select a video first.", "Najprije dodajte i odaberite video."},
             {"Add video files", "Dodaj video datoteke"},
@@ -3808,7 +3814,7 @@ namespace
                 static const QHash<QString, QString> sr = {
             {"%1 rows × %2 columns", "%1 редова × %2 колоне"},
             {"About", "О програму"},
-            {"About Thumbnail me 4b2", "О Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "О Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Прецизно (најспорије)"},
             {"Add and select a video first.", "Прво додај и изабери видео."},
             {"Add video files", "Додај видео датотеке"},
@@ -3942,7 +3948,7 @@ namespace
                 static const QHash<QString, QString> mk = {
             {"%1 rows × %2 columns", "%1 редови × %2 колони"},
             {"About", "За програмата"},
-            {"About Thumbnail me 4b2", "За Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "За Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Точен (најбавен)"},
             {"Add and select a video first.", "Прво додај и избери видео."},
             {"Add video files", "Додај видео датотеки"},
@@ -4076,7 +4082,7 @@ namespace
                 static const QHash<QString, QString> cnr = {
             {"%1 rows × %2 columns", "%1 redaka × %2 stupca"},
             {"About", "O programu"},
-            {"About Thumbnail me 4b2", "O Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "O Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Precizno (najsporije)"},
             {"Add and select a video first.", "Najprije dodajte i odaberite video."},
             {"Add video files", "Dodaj video fajlove"},
@@ -4210,7 +4216,7 @@ namespace
                 static const QHash<QString, QString> isl = {
             {"%1 rows × %2 columns", "%1 raðir × %2 dálkar"},
             {"About", "Um forritið"},
-            {"About Thumbnail me 4b2", "Um Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Um Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Nákvæmt (hægast)"},
             {"Add and select a video first.", "Bættu fyrst við myndbandi og veldu það."},
             {"Add video files", "Bæta við myndbandsskrám"},
@@ -4344,7 +4350,7 @@ namespace
                 static const QHash<QString, QString> nor = {
             {"%1 rows × %2 columns", "%1 rader × %2 kolonner"},
             {"About", "Om"},
-            {"About Thumbnail me 4b2", "Om Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Om Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Nøyaktig (tregest)"},
             {"Add and select a video first.", "Legg til og velg en video først."},
             {"Add video files", "Legg til videofiler"},
@@ -4478,7 +4484,7 @@ namespace
                 static const QHash<QString, QString> uk = {
             {"%1 rows × %2 columns", "%1 рядків × %2 стовпці"},
             {"About", "Про програму"},
-            {"About Thumbnail me 4b2", "Про Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Про Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Точний (найповільніший)"},
             {"Add and select a video first.", "Спочатку додайте та виберіть відео."},
             {"Add video files", "Додати відеофайли"},
@@ -4612,7 +4618,7 @@ namespace
                 static const QHash<QString, QString> tr = {
             {"%1 rows × %2 columns", "%1 satır × %2 sütun"},
             {"About", "Hakkında"},
-            {"About Thumbnail me 4b2", "Thumbnail me 4b2 hakkında"},
+            {"About Thumbnail me 4b2p", "Thumbnail me 4b2p hakkında"},
             {"Accurate (slowest)", "Doğru (en yavaş)"},
             {"Add and select a video first.", "Önce bir video ekleyip seçin."},
             {"Add video files", "Video dosyaları ekle"},
@@ -4746,7 +4752,7 @@ namespace
                 static const QHash<QString, QString> ca = {
             {"%1 rows × %2 columns", "%1 files × %2 columnes"},
             {"About", "Quant a"},
-            {"About Thumbnail me 4b2", "Quant a Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Quant a Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Precís (el més lent)"},
             {"Add and select a video first.", "Afegeix i selecciona primer un vídeo."},
             {"Add video files", "Afegeix fitxers de vídeo"},
@@ -4880,7 +4886,7 @@ namespace
                 static const QHash<QString, QString> lb = {
             {"%1 rows × %2 columns", "%1 Reien × %2 Kolonnen"},
             {"About", "Iwwer"},
-            {"About Thumbnail me 4b2", "Iwwer Thumbnail me 4b2"},
+            {"About Thumbnail me 4b2p", "Iwwer Thumbnail me 4b2p"},
             {"Accurate (slowest)", "Genee (am luessten)"},
             {"Add and select a video first.", "Setzt fir d’éischt e Video dobäi a wielt en aus."},
             {"Add video files", "Videodateien dobäisetzen"},
@@ -5014,7 +5020,7 @@ namespace
                 static const QHash<QString, QString> hy = {
             {"%1 rows × %2 columns", "%1 տող × %2 սյունակ"},
             {"About", "Ծրագրի մասին"},
-            {"About Thumbnail me 4b2", "Thumbnail me 4b2-ի մասին"},
+            {"About Thumbnail me 4b2p", "Thumbnail me 4b2p-ի մասին"},
             {"Accurate (slowest)", "Ճշգրիտ (ամենադանդաղ)"},
             {"Add and select a video first.", "Նախ ավելացրեք և ընտրեք վիդեո։"},
             {"Add video files", "Ավելացնել վիդեո ֆայլեր"},
@@ -5148,7 +5154,7 @@ namespace
                 static const QHash<QString, QString> ka = {
             {"%1 rows × %2 columns", "%1 სტრიქონი × %2 სვეტი"},
             {"About", "პროგრამის შესახებ"},
-            {"About Thumbnail me 4b2", "Thumbnail me 4b2-ის შესახებ"},
+            {"About Thumbnail me 4b2p", "Thumbnail me 4b2p-ის შესახებ"},
             {"Accurate (slowest)", "ზუსტი (ყველაზე ნელი)"},
             {"Add and select a video first.", "ჯერ დაამატეთ და აირჩიეთ ვიდეო."},
             {"Add video files", "ვიდეო ფაილების დამატება"},
@@ -5282,7 +5288,7 @@ namespace
                 static const QHash<QString, QString> az = {
             {"%1 rows × %2 columns", "%1 sətir × %2 sütun"},
             {"About", "Haqqında"},
-            {"About Thumbnail me 4b2", "Thumbnail me 4b2 haqqında"},
+            {"About Thumbnail me 4b2p", "Thumbnail me 4b2p haqqında"},
             {"Accurate (slowest)", "Dəqiq (ən yavaş)"},
             {"Add and select a video first.", "Əvvəlcə video əlavə edib seçin."},
             {"Add video files", "Video faylları əlavə et"},
@@ -5487,12 +5493,94 @@ namespace
             "All files (*.*)"
         );
     }
+
+    QString persistentDirectoryFromEnvironment(const char *name)
+    {
+        const QByteArray value = qgetenv(name);
+        if (value.isEmpty()) {
+            return QString();
+        }
+
+        const QString path = QString::fromLocal8Bit(value).trimmed();
+        if (path.isEmpty()) {
+            return QString();
+        }
+
+        QDir().mkpath(path);
+        return path;
+    }
+
+    QString persistentConfigDirectory()
+    {
+#ifdef Q_OS_WIN
+        return QCoreApplication::applicationDirPath();
+#else
+        QString dir = persistentDirectoryFromEnvironment("THUMBNAILME4_CONFIG_DIR");
+        if (!dir.isEmpty()) {
+            return dir;
+        }
+
+        QString configRoot = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+        if (configRoot.isEmpty() || configRoot.startsWith("/tmp/.mount_")) {
+            configRoot = QDir::home().filePath(".config");
+        }
+
+        dir = QDir(configRoot).filePath("ThumbnailMe4");
+        QDir().mkpath(dir);
+        return dir;
+#endif
+    }
+
+    QString persistentDataDirectory()
+    {
+#ifdef Q_OS_WIN
+        return QCoreApplication::applicationDirPath();
+#else
+        QString dir = persistentDirectoryFromEnvironment("THUMBNAILME4_DATA_DIR");
+        if (!dir.isEmpty()) {
+            return dir;
+        }
+
+        QString dataRoot = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+        if (dataRoot.isEmpty() || dataRoot.startsWith("/tmp/.mount_")) {
+            dataRoot = QDir::home().filePath(".local/share");
+        }
+
+        dir = QDir(dataRoot).filePath("ThumbnailMe4");
+        QDir().mkpath(dir);
+        return dir;
+#endif
+    }
+
+    QString defaultConfigurationFilePath()
+    {
+#ifdef Q_OS_WIN
+        return QDir(QCoreApplication::applicationDirPath()).filePath("thumbnailme4.ini");
+#else
+        return QDir(persistentConfigDirectory()).filePath("thumbnailme4.ini");
+#endif
+    }
+
+    QString defaultRelativeOutputRoot()
+    {
+#ifdef Q_OS_WIN
+        return QCoreApplication::applicationDirPath();
+#else
+        QString pictures = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+        if (pictures.isEmpty() || pictures.startsWith("/tmp/.mount_")) {
+            pictures = QDir::homePath();
+        }
+
+        return pictures;
+#endif
+    }
+
 }
 
 
 MainWindow::MainWindow()
 {
-    setWindowTitle("Thumbnail me 4b2");
+    setWindowTitle("Thumbnail me 4b2p");
     resize(1500, 850);
 
     selectedFont = font();
@@ -5857,7 +5945,7 @@ MainWindow::MainWindow()
     output = new QTextEdit(leftPanel);
     output->setReadOnly(true);
     output->setText(
-        QString("Thumbnail me 4b2\n\n"
+        QString("Thumbnail me 4b2p\n\n"
                 "Beta 2 build:\n"
                 "- Broad multilingual UI translation set\n"
                 "- Optimized FFmpeg runtime size\n"
@@ -5983,16 +6071,16 @@ MainWindow::MainWindow()
     addOriginalPreset("5 x 3", 5, 3);
 
     auto *aboutMenu = menuBar()->addMenu(uiText("About"));
-    aboutMenu->addAction(uiText("About Thumbnail me 4b2"), this, [this]() {
+    aboutMenu->addAction(uiText("About Thumbnail me 4b2p"), this, [this]() {
         QMessageBox::information(
             this,
-            "About Thumbnail me 4b2",
-            "Thumbnail me 4b2\n\n"
+            "About Thumbnail me 4b2p",
+            "Thumbnail me 4b2p\n\n"
             "Modern Qt6 / FFmpeg / MediaInfo continuation of the original GPL Thumbnail me concept.\n\n"
             "License: GPL-2.0-or-later\n"
             "Uses Qt, FFmpeg, MediaInfo and Qt Image Formats / libwebp.\n"
             "See the licenses folder in the Windows ZIP package for full third-party notices.\n\n"
-            "Version 4b2 / beta 2."
+            "Version 4b2p / beta 2 pre-release."
         );
     });
 
@@ -6047,12 +6135,12 @@ MainWindow::MainWindow()
     updateRecentConfigurationsMenu();
     updateWindowTitle();
 
-    statusBar()->showMessage("Thumbnail me 4b2 ready");
+    statusBar()->showMessage("Thumbnail me 4b2p ready");
 }
 
 QString MainWindow::settingsFilePath() const
 {
-    return QDir(QCoreApplication::applicationDirPath()).filePath("settings.ini");
+    return QDir(persistentConfigDirectory()).filePath("settings.ini");
 }
 
 void MainWindow::loadSettings()
@@ -6310,7 +6398,7 @@ void MainWindow::saveConfiguration()
 
 void MainWindow::saveConfigurationAs()
 {
-    QString startPath = QDir(QCoreApplication::applicationDirPath()).filePath("thumbnailme4.ini");
+    QString startPath = defaultConfigurationFilePath();
     if (!currentConfigFile.isEmpty()) {
         startPath = currentConfigFile;
     } else if (!recentConfigurations().isEmpty()) {
@@ -6458,7 +6546,7 @@ void MainWindow::updateRecentConfigurationsMenu()
 
 void MainWindow::updateWindowTitle()
 {
-    QString title = "Thumbnail me 4b2";
+    QString title = "Thumbnail me 4b2p";
     if (!currentConfigFile.isEmpty()) {
         title += " - " + QFileInfo(currentConfigFile).fileName();
     }
@@ -6820,7 +6908,12 @@ void MainWindow::generateAll()
 
 bool MainWindow::runWorkerForFile(const QString &fileName, QString &message, QString *savedOutputPath)
 {
-    const QString program = QDir(QCoreApplication::applicationDirPath()).filePath("ThumbnailMeWorker.exe");
+#ifdef Q_OS_WIN
+    const QString workerExecutableName = "ThumbnailMeWorker.exe";
+#else
+    const QString workerExecutableName = "ThumbnailMeWorker";
+#endif
+    const QString program = QDir(QCoreApplication::applicationDirPath()).filePath(workerExecutableName);
     const QString outputPath = automaticOutputPathFor(fileName);
     if (savedOutputPath) {
         *savedOutputPath = outputPath;
@@ -7416,7 +7509,7 @@ QString MainWindow::outputFolderPath() const
     QDir dir(folder);
 
     if (dir.isRelative()) {
-        dir = QDir(QCoreApplication::applicationDirPath()).filePath(folder);
+        dir = QDir(defaultRelativeOutputRoot()).filePath(folder);
     }
 
     const QString absolutePath = QDir::cleanPath(dir.absolutePath());

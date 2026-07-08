@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableExtensions
 
-rem Thumbnail me 4b2 - experimental MTN-style FFmpeg runtime builder.
+rem Thumbnail me 4b2p - optimized FFmpeg runtime builder.
 rem Run this from a Visual Studio Developer Command Prompt.
 rem Requires MSYS2 bash, git, and Visual Studio build tools in PATH.
 

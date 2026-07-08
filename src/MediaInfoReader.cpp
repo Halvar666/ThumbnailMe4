@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QLibrary>
+#include <QRegularExpression>
 #include <QStringList>
 
 namespace
@@ -50,14 +51,25 @@ namespace
 
         const QString appDir = QCoreApplication::applicationDirPath();
         if (!appDir.isEmpty()) {
+#ifdef Q_OS_WIN
             names << QDir(appDir).filePath("MediaInfo.dll");
             names << QDir(appDir).filePath("MediaInfo64.dll");
             names << QDir(appDir).filePath("libmediainfo.dll");
+#else
+            names << QDir(appDir).filePath("libmediainfo.so");
+            names << QDir(appDir).filePath("libmediainfo.so.0");
+#endif
         }
 
+#ifdef Q_OS_WIN
         names << "MediaInfo.dll";
         names << "MediaInfo64.dll";
         names << "libmediainfo.dll";
+#else
+        names << "mediainfo";
+        names << "libmediainfo.so";
+        names << "libmediainfo.so.0";
+#endif
 
         return names;
     }
@@ -257,6 +269,52 @@ namespace
         });
     }
 
+    QString compactLanguageCode(QString value)
+    {
+        value = value.trimmed();
+        if (value.isEmpty()) {
+            return QString();
+        }
+
+        // MediaInfo can return values such as "eng English" when raw language
+        // output is enabled. For the subtitle summary we only want the compact
+        // language code, otherwise long multi-subtitle headers become unreadable.
+        static const QRegularExpression codeTokenRe(QStringLiteral("^[A-Za-z]{2,3}$"));
+        const QString normalized = value.replace('_', '-');
+        const QStringList tokens = normalized.split(QRegularExpression(QStringLiteral("[\\s,;/()\\[\\]{}]+")), Qt::SkipEmptyParts);
+
+        for (QString token : tokens) {
+            token = token.trimmed();
+            if (token.endsWith(':') || token.endsWith('.')) {
+                token.chop(1);
+            }
+
+            const int dash = token.indexOf('-');
+            if (dash > 0) {
+                const QString prefix = token.left(dash);
+                if (codeTokenRe.match(prefix).hasMatch()) {
+                    return prefix.toLower();
+                }
+            }
+
+            if (codeTokenRe.match(token).hasMatch()) {
+                return token.toLower();
+            }
+        }
+
+        return value;
+    }
+
+    QString subtitleLanguageCode(const MediaInfoApi &api, MediaInfoHandle handle, size_t index)
+    {
+        return compactLanguageCode(firstNonEmpty({
+            getValue(api, handle, Stream_Text, index, L"Language/String3"),
+            getValue(api, handle, Stream_Text, index, L"Language/String2"),
+            getValue(api, handle, Stream_Text, index, L"Language"),
+            getValue(api, handle, Stream_Text, index, L"Language/String")
+        }));
+    }
+
     QString streamTitleText(const MediaInfoApi &api, MediaInfoHandle handle, size_t streamKind, size_t index)
     {
         return firstNonEmpty({
@@ -451,24 +509,17 @@ namespace
 
     QString textStreamDescription(const MediaInfoApi &api, MediaInfoHandle handle, size_t index)
     {
-        QStringList parts;
-
-        const QString language = languageText(api, handle, Stream_Text, index);
+        const QString language = subtitleLanguageCode(api, handle, index);
         if (!language.isEmpty()) {
-            parts << language;
+            return language;
         }
 
-        const QString title = streamTitleText(api, handle, Stream_Text, index);
-        if (!title.isEmpty() && !parts.contains(title, Qt::CaseInsensitive)) {
-            parts << title;
+        const QString format = getValue(api, handle, Stream_Text, index, L"Format").trimmed();
+        if (!format.isEmpty()) {
+            return format.toLower();
         }
 
-        const QString format = getValue(api, handle, Stream_Text, index, L"Format");
-        if (parts.isEmpty() && !format.isEmpty()) {
-            parts << format;
-        }
-
-        return parts.join(" ");
+        return QString();
     }
 }
 
@@ -601,7 +652,7 @@ QString MediaInfoReader::summaryForFile(const QString &fileName, const VideoInfo
     QStringList subtitleItems;
     for (size_t i = 0; i < subtitleCount; ++i) {
         const QString item = textStreamDescription(api, handle, i);
-        if (!item.isEmpty()) {
+        if (!item.isEmpty() && !subtitleItems.contains(item, Qt::CaseInsensitive)) {
             subtitleItems << item;
         }
     }

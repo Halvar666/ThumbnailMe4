@@ -14,6 +14,9 @@
 #include <QFont>
 #include <QImage>
 #include <QImageWriter>
+#include <QFile>
+#include <QProcess>
+#include <QTemporaryFile>
 #include <QTextStream>
 #include <QVector>
 
@@ -82,6 +85,207 @@ static double optionDouble(
     }
 
     return value;
+}
+
+
+static QByteArray imageFormatForExtension(const QString &extension)
+{
+    const QString normalized = extension.trimmed().toLower();
+
+    if (normalized == "jpg" || normalized == "jpeg") {
+        return "JPG";
+    }
+
+    if (normalized == "webp") {
+        return "WEBP";
+    }
+
+    if (normalized == "png") {
+        return "PNG";
+    }
+
+    return normalized.toUtf8().toUpper();
+}
+
+static QImage prepareImageForWebP(const QImage &sheet, QTextStream &err)
+{
+    if (sheet.isNull()) {
+        return QImage();
+    }
+
+    // WebP stores width/height in 14-bit fields. Very tall contact sheets,
+    // especially from portrait 9:16 videos, can exceed this and make some
+    // encoders fail badly. Keep the export usable and avoid worker crashes.
+    constexpr int maxWebpSide = 16383;
+
+    QImage image = sheet;
+    if (image.width() > maxWebpSide || image.height() > maxWebpSide) {
+        const QSize targetSize = image.size().scaled(
+            maxWebpSide,
+            maxWebpSide,
+            Qt::KeepAspectRatio
+        );
+
+        err << "WebP output is too large (" << image.width() << "x" << image.height()
+            << "); downscaling to " << targetSize.width() << "x" << targetSize.height()
+            << " for WebP compatibility.\n";
+
+        image = image.scaled(targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
+
+    if (image.isNull()) {
+        return QImage();
+    }
+
+    // RGB888 is the safest input for Qt/libwebp in AppImage builds. The
+    // contact sheet background is opaque, so we do not need to preserve alpha.
+    if (image.format() != QImage::Format_RGB888) {
+        image = image.convertToFormat(QImage::Format_RGB888);
+    }
+
+    return image;
+}
+
+static bool savePngTempFile(const QImage &image, QString &pngPath, QString &error)
+{
+    QTemporaryFile tempFile(QDir::tempPath() + "/thumbnailme4_webp_XXXXXX.png");
+    tempFile.setAutoRemove(false);
+
+    if (!tempFile.open()) {
+        error = "Could not create temporary PNG file.";
+        return false;
+    }
+
+    pngPath = tempFile.fileName();
+    tempFile.close();
+
+    QImageWriter pngWriter(pngPath, "PNG");
+    if (!pngWriter.write(image)) {
+        error = "Temporary PNG save failed: " + pngWriter.errorString();
+        QFile::remove(pngPath);
+        return false;
+    }
+
+    return true;
+}
+
+static QString ffmpegExecutablePath()
+{
+#ifdef Q_OS_WIN
+    const QString local = QDir(QCoreApplication::applicationDirPath()).filePath("ffmpeg.exe");
+    if (QFileInfo::exists(local)) {
+        return local;
+    }
+    return "ffmpeg.exe";
+#else
+    const QString local = QDir(QCoreApplication::applicationDirPath()).filePath("ffmpeg");
+    if (QFileInfo::exists(local)) {
+        return local;
+    }
+    return "ffmpeg";
+#endif
+}
+
+static bool saveWebPViaFFmpeg(const QImage &image, const QString &outputFile, int quality, QString &error)
+{
+    QString tempPng;
+    if (!savePngTempFile(image, tempPng, error)) {
+        return false;
+    }
+
+    QStringList arguments;
+    arguments << "-y";
+    arguments << "-hide_banner";
+    arguments << "-loglevel" << "error";
+    arguments << "-i" << tempPng;
+    arguments << "-c:v" << "libwebp";
+    arguments << "-q:v" << QString::number(qBound(1, quality, 100));
+    arguments << outputFile;
+
+    QProcess process;
+    process.start(ffmpegExecutablePath(), arguments);
+
+    if (!process.waitForStarted(5000)) {
+#ifdef Q_OS_WIN
+        error = "ffmpeg.exe could not be started. Make sure it is present next to ThumbnailMeWorker.exe.";
+#else
+        error = "ffmpeg could not be started. Install ffmpeg or rely on the bundled Qt WebP image plugin.";
+#endif
+        QFile::remove(tempPng);
+        return false;
+    }
+
+    process.waitForFinished(-1);
+
+    const QByteArray stdErr = process.readAllStandardError();
+    const bool ok = process.exitStatus() == QProcess::NormalExit
+        && process.exitCode() == 0
+        && QFileInfo::exists(outputFile)
+        && QFileInfo(outputFile).size() > 0;
+
+    if (!ok) {
+        error = QString("ffmpeg WebP fallback failed. exitCode=%1. %2")
+            .arg(process.exitCode())
+            .arg(QString::fromLocal8Bit(stdErr).trimmed());
+        QFile::remove(tempPng);
+        return false;
+    }
+
+    QFile::remove(tempPng);
+    return true;
+}
+
+static bool saveSheetImage(
+    const QImage &sheet,
+    const QString &outputFile,
+    int quality,
+    QTextStream &err
+)
+{
+    const QString extension = QFileInfo(outputFile).suffix().toLower();
+    const int saveQuality = extension == "png" ? -1 : quality;
+    const QByteArray imageFormat = imageFormatForExtension(extension);
+
+    QImage imageToSave = sheet;
+    if (extension == "webp") {
+        imageToSave = prepareImageForWebP(sheet, err);
+        if (imageToSave.isNull()) {
+            err << "WebP preparation failed.\n";
+            return false;
+        }
+    }
+
+    QImageWriter writer(outputFile, imageFormat);
+    if (saveQuality >= 0) {
+        writer.setQuality(saveQuality);
+    }
+
+    if (writer.write(imageToSave)) {
+        return true;
+    }
+
+    QStringList formats;
+    for (const QByteArray &format : QImageWriter::supportedImageFormats()) {
+        formats << QString::fromLatin1(format);
+    }
+
+    err << "Qt image writer failed: " << writer.errorString() << "\n";
+    err << "Requested image format: " << QString::fromLatin1(imageFormat) << "\n";
+    err << "Supported Qt image formats: " << formats.join(", ") << "\n";
+
+    if (extension == "webp") {
+        err << "Trying ffmpeg WebP fallback...\n";
+
+        QString fallbackError;
+        if (saveWebPViaFFmpeg(imageToSave, outputFile, saveQuality >= 0 ? saveQuality : 95, fallbackError)) {
+            err << "ffmpeg WebP fallback OK.\n";
+            return true;
+        }
+
+        err << fallbackError << "\n";
+    }
+
+    return false;
 }
 
 static bool convertFrameToImage(AVFrame *frame, QImage &outImage, QString &outLog, int targetWidth = 0, int targetHeight = 0)
@@ -811,33 +1015,8 @@ int main(int argc, char *argv[])
         return 5;
     }
 
-    const QString extension = QFileInfo(outputFile).suffix().toLower();
-    const int saveQuality = extension == "png" ? -1 : quality;
-
-    QByteArray imageFormat = extension.toUtf8().toUpper();
-    if (extension == "jpg" || extension == "jpeg") {
-        imageFormat = "JPG";
-    } else if (extension == "webp") {
-        imageFormat = "WEBP";
-    } else if (extension == "png") {
-        imageFormat = "PNG";
-    }
-
-    QImageWriter writer(outputFile, imageFormat);
-    if (saveQuality >= 0) {
-        writer.setQuality(saveQuality);
-    }
-
-    if (!writer.write(sheet)) {
-        QStringList formats;
-        for (const QByteArray &format : QImageWriter::supportedImageFormats()) {
-            formats << QString::fromLatin1(format);
-        }
-
+    if (!saveSheetImage(sheet, outputFile, quality, err)) {
         err << "Save failed: " << outputFile << "\n";
-        err << "Image writer error: " << writer.errorString() << "\n";
-        err << "Requested image format: " << QString::fromLatin1(imageFormat) << "\n";
-        err << "Supported image formats: " << formats.join(", ") << "\n";
         return 6;
     }
 

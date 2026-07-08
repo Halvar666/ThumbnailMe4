@@ -1,7 +1,7 @@
-Thumbnail me 4b2 - Windows x64 ZIP package
+Thumbnail me 4 Beta 3 - Windows x64 ZIP package
 ==========================================
 
-This package is a standalone Windows x64 ZIP build of Thumbnail me 4b2.
+This package is a standalone Windows x64 ZIP build of Thumbnail me 4 Beta 3.
 
 It is not a PortableApps.com / PAF package. It is simply a self-contained
 ZIP distribution with the required runtime DLLs and plugins placed next to
@@ -32,15 +32,16 @@ Notes:
   or source archive.
 
 Suggested release asset name:
-  ThumbnailMe4-4b2-win64.zip
+  ThumbnailMe4-Beta3-win64.zip
 
 Suggested GitHub release tag:
-  v4b2
+  v4b3
 
-Beta 2 notes
+Beta 3 notes
 ------------------------
 - This build uses an optimized FFmpeg runtime. It keeps broad input video support while removing unused output, network, device and program components.
 - DirectX shader compiler DLLs and the Visual C++ Redistributable installer are not bundled.
 - Required Microsoft Visual C++ runtime DLLs are bundled app-locally next to ThumbnailMe4.exe.
 - MediaInfo headers include per-stream audio/video bitrates when MediaInfo exposes them.
 - The multilingual UI translation set is beta-quality and may be refined later from user/native-speaker feedback.
+

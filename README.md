@@ -1,14 +1,14 @@
 # Thumbnail me 4
 
-Current beta release: **4b2**
+Current beta release: **Beta 3**
 
 Thumbnail me 4 is a modern Qt6 / FFmpeg / MediaInfo continuation and direct GPL-compatible fork of the original Thumbnail me thumbnail sheet generator.
 
-It creates contact sheets from video files and keeps the original Thumbnail me workflow while modernizing the application for current Windows systems.
+It creates contact sheets from video files and keeps the original Thumbnail me workflow while modernizing the application for current Windows and Linux systems.
 
 ## Current status
 
-Beta 2 / active development.
+Beta 3 / active development.
 
 ## Features
 
@@ -53,3 +53,4 @@ Thumbnail me 4 is released under the GNU GPL:
 `GPL-2.0-or-later`
 
 See `LICENSE`, `NOTICE.md`, `CREDITS.md` and `dist_files/licenses/` for third-party notices.
+

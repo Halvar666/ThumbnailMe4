@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="body" x1="20" y1="18" x2="108" y2="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4f79b8"/>
+      <stop offset="1" stop-color="#1f3f73"/>
+    </linearGradient>
+    <linearGradient id="frame" x1="18" y1="18" x2="110" y2="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f5f7fb"/>
+      <stop offset="1" stop-color="#c9d2e5"/>
+    </linearGradient>
+  </defs>
+  <rect x="14" y="18" width="100" height="92" rx="14" fill="url(#body)" stroke="#0f1f38" stroke-width="4"/>
+  <rect x="25" y="30" width="78" height="56" rx="6" fill="#10141c" stroke="url(#frame)" stroke-width="4"/>
+  <g fill="#dbe7ff">
+    <rect x="22" y="24" width="10" height="10" rx="2"/>
+    <rect x="42" y="24" width="10" height="10" rx="2"/>
+    <rect x="62" y="24" width="10" height="10" rx="2"/>
+    <rect x="82" y="24" width="10" height="10" rx="2"/>
+    <rect x="96" y="94" width="10" height="10" rx="2"/>
+    <rect x="76" y="94" width="10" height="10" rx="2"/>
+    <rect x="56" y="94" width="10" height="10" rx="2"/>
+    <rect x="36" y="94" width="10" height="10" rx="2"/>
+  </g>
+  <path d="M50 43v30l28-15z" fill="#f4d35e" stroke="#fff2a8" stroke-width="2" stroke-linejoin="round"/>
+  <text x="64" y="119" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="20" font-weight="700" fill="#0f1f38">TM4</text>
+</svg>

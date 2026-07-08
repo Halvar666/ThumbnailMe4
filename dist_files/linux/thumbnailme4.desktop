@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Thumbnail me 4
+Comment=Create video thumbnail sheets
+Exec=ThumbnailMe4 %F
+Icon=thumbnailme4
+Terminal=false
+Categories=AudioVideo;Video;Graphics;
+MimeType=video/x-matroska;video/mp4;video/x-msvideo;video/x-ms-wmv;video/mpeg;video/webm;video/quicktime;video/x-flv;video/mp2t;
+StartupNotify=true

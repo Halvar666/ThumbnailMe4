@@ -1,6 +1,6 @@
 # Thumbnail me 4 - experimental MTN-style FFmpeg runtime
 
-This is an internal helper for building the optimized FFmpeg runtime used by Thumbnail me 4b2.
+This is an internal helper for building the optimized FFmpeg runtime used by Thumbnail me 4b2p.
 
 The goal is to reduce the Windows ZIP size without going back to `mtn.exe`.
 Thumbnail me 4 still decodes frames itself through FFmpeg libraries, but this

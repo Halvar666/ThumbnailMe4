@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -e
+
+HERE="$(dirname "$(readlink -f "$0")")"
+
+export PATH="$HERE/usr/bin:${PATH:-}"
+
+# AppImage is mounted/extracted under /tmp/.mount_* on each run.
+# Force Qt/app configuration to the user's persistent config directory.
+if [ -z "${XDG_CONFIG_HOME:-}" ]; then
+    export XDG_CONFIG_HOME="$HOME/.config"
+fi
+
+if [ -z "${XDG_DATA_HOME:-}" ]; then
+    export XDG_DATA_HOME="$HOME/.local/share"
+fi
+
+export THUMBNAILME4_CONFIG_DIR="$XDG_CONFIG_HOME/ThumbnailMe4"
+export THUMBNAILME4_DATA_DIR="$XDG_DATA_HOME/ThumbnailMe4"
+mkdir -p "$THUMBNAILME4_CONFIG_DIR" "$THUMBNAILME4_DATA_DIR" 2>/dev/null || true
+
+if [ "${THUMBNAILME4_DEBUG_PATHS:-0}" = "1" ]; then
+    echo "THUMBNAILME4_CONFIG_DIR=$THUMBNAILME4_CONFIG_DIR" >&2
+    echo "THUMBNAILME4_DATA_DIR=$THUMBNAILME4_DATA_DIR" >&2
+fi
+
+LD_PATHS=()
+[ -d "$HERE/usr/lib" ] && LD_PATHS+=("$HERE/usr/lib")
+[ -d "$HERE/usr/lib/x86_64-linux-gnu" ] && LD_PATHS+=("$HERE/usr/lib/x86_64-linux-gnu")
+[ -d "$HERE/lib" ] && LD_PATHS+=("$HERE/lib")
+
+if [ "${#LD_PATHS[@]}" -gt 0 ]; then
+    joined="$(IFS=:; echo "${LD_PATHS[*]}")"
+    export LD_LIBRARY_PATH="$joined:${LD_LIBRARY_PATH:-}"
+fi
+
+QT_PLUGIN_PATHS=()
+[ -d "$HERE/usr/plugins" ] && QT_PLUGIN_PATHS+=("$HERE/usr/plugins")
+[ -d "$HERE/usr/lib/qt6/plugins" ] && QT_PLUGIN_PATHS+=("$HERE/usr/lib/qt6/plugins")
+[ -d "$HERE/usr/lib/x86_64-linux-gnu/qt6/plugins" ] && QT_PLUGIN_PATHS+=("$HERE/usr/lib/x86_64-linux-gnu/qt6/plugins")
+
+if [ "${#QT_PLUGIN_PATHS[@]}" -gt 0 ]; then
+    joined="$(IFS=:; echo "${QT_PLUGIN_PATHS[*]}")"
+    export QT_PLUGIN_PATH="$joined:${QT_PLUGIN_PATH:-}"
+    export QT_QPA_PLATFORM_PLUGIN_PATH="$joined/platforms:${QT_QPA_PLATFORM_PLUGIN_PATH:-}"
+fi
+
+# Default to XCB/XWayland for broad KDE/GNOME/XFCE/Cinnamon/MATE compatibility.
+# Users can override it, e.g. QT_QPA_PLATFORM=wayland ./ThumbnailMe4.AppImage
+export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}"
+
+exec "$HERE/usr/bin/ThumbnailMe4" "$@"

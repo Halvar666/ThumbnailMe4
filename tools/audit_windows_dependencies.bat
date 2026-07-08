@@ -1,7 +1,7 @@
 @echo off
 setlocal
 
-set RELEASE_BASENAME=ThumbnailMe4-4b2-win64
+set RELEASE_BASENAME=ThumbnailMe4-4b2p-win64
 set DIST_DIR=%CD%\dist\%RELEASE_BASENAME%
 
 if not exist "%DIST_DIR%\ThumbnailMe4.exe" (
