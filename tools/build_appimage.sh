@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_VERSION="${APP_VERSION:-4b2p}"
+APP_VERSION="${APP_VERSION:-4b2q}"
 RELEASE_BASENAME="ThumbnailMe4-${APP_VERSION}-linux-x86_64"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

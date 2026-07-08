@@ -1,13 +1,13 @@
 # Thumbnail me 4 AppImage build notes
 
-Internal build baseline: **4b2p**
+Internal build baseline: **4b2q / Beta 3**
 
 The public Linux package should be an AppImage rather than one tarball per distribution.
 The lean tar.xz package remains useful as a fallback and for debugging, but it is not distro-independent.
 
 ## Ubuntu build dependencies
 
-On Ubuntu 26.04 LTS:
+On Ubuntu 24.04 LTS:
 
 ```bash
 sudo apt update
@@ -67,13 +67,13 @@ tools/build_appimage.sh
 Expected output:
 
 ```text
-dist/ThumbnailMe4-4b2p-linux-x86_64.AppImage
+dist/ThumbnailMe4-4b2q-linux-x86_64.AppImage
 ```
 
 Run:
 
 ```bash
-./dist/ThumbnailMe4-4b2p-linux-x86_64.AppImage
+./dist/ThumbnailMe4-4b2q-linux-x86_64.AppImage
 ```
 
 ## Notes
@@ -83,10 +83,10 @@ Run:
 - Native Wayland can be tested with:
 
 ```bash
-QT_QPA_PLATFORM=wayland ./dist/ThumbnailMe4-4b2p-linux-x86_64.AppImage
+QT_QPA_PLATFORM=wayland ./dist/ThumbnailMe4-4b2q-linux-x86_64.AppImage
 ```
 
-- Ubuntu 26.04 is acceptable for the first AppImage prototype. For maximum backward compatibility, a later public build may need an older LTS build VM.
+- Ubuntu 24.04 is acceptable for the first AppImage prototype. For maximum backward compatibility, a later public build may need an older LTS build VM.
 
 
 ## Persistent settings
@@ -100,7 +100,7 @@ The AppImage mount directory is temporary, so Linux builds store `settings.ini` 
 The Windows ZIP build remains portable and still stores `settings.ini` next to `ThumbnailMe4.exe`.
 
 
-## 4b2p persistent settings note
+## 4b2q persistent settings note
 
 The AppImage launcher exports `THUMBNAILME4_CONFIG_DIR` and `THUMBNAILME4_DATA_DIR`.
 The application uses these variables before falling back to Qt standard paths.
@@ -114,7 +114,7 @@ Expected persistent files:
 ```
 
 
-## 4b2p notes
+## 4b2q notes
 
 This build script always cleans the AppImage build directory before compiling,
 then verifies that the built binary contains persistent AppImage settings support.
@@ -124,14 +124,14 @@ through `QLibrary`, so normal dependency scanners may miss it.
 Useful verification commands on a test system:
 
 ```bash
-./ThumbnailMe4-4b2p-linux-x86_64.AppImage --appimage-extract >/dev/null
+./ThumbnailMe4-4b2q-linux-x86_64.AppImage --appimage-extract >/dev/null
 find squashfs-root -iname '*mediainfo*'
 grep -n 'THUMBNAILME4_CONFIG_DIR' squashfs-root/AppRun
-THUMBNAILME4_DEBUG_PATHS=1 ./ThumbnailMe4-4b2p-linux-x86_64.AppImage
+THUMBNAILME4_DEBUG_PATHS=1 ./ThumbnailMe4-4b2q-linux-x86_64.AppImage
 ```
 
 
-## 4b2p note
+## 4b2q note
 
 The worker now prepares WebP output more defensively:
 
@@ -141,9 +141,9 @@ The worker now prepares WebP output more defensively:
 - verifies that the AppImage contains the Qt WebP image plugin (`libqwebp.so`).
 
 
-## 4b2p unified build note
+## 4b2q unified build note
 
-4b2p is the synchronization build before beta 3. It keeps the Linux/AppImage
+4b2q is the synchronization build before beta 3. It keeps the Linux/AppImage
 fixes that were validated in 4b2o and carries the generic fixes back into the
 shared source files used by Windows builds:
 

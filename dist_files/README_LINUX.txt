@@ -1,11 +1,11 @@
 Thumbnail me 4 - Linux test package
 ===================================
 
-This is the experimental Linux package of Thumbnail me 4.
+This is the Linux package information for Thumbnail me 4 Beta 3.
 
-It is distributed as a simple tar.xz folder with a shell launcher:
+The preferred public Linux package is distributed as an AppImage:
 
-    ./ThumbnailMe4.sh
+    ./ThumbnailMe4-Beta3-linux-x86_64.AppImage
 
 This package is intentionally a lean, system-library package. It does not
 bundle Qt, FFmpeg or MediaInfo libraries. That keeps the package small and
@@ -26,7 +26,7 @@ dependencies are installed:
 The launcher defaults to the Qt XCB backend for broad compatibility across
 X11 and XWayland sessions. Native Wayland can be tested manually:
 
-    QT_QPA_PLATFORM=wayland ./ThumbnailMe4.sh
+    QT_QPA_PLATFORM=wayland ./ThumbnailMe4-Beta3-linux-x86_64.AppImage
 
 Runtime dependencies
 --------------------
@@ -94,12 +94,12 @@ Notes
 
 - Settings are stored in `~/.config/ThumbnailMe4/settings.ini`.
 - Subtitle summaries use compact language codes, for example `eng; deu; jpn`, to keep the thumbnail header readable.
-- AppImage/Flatpak packaging is intentionally not used at this stage.
+- The public Beta 3 Linux build is distributed as an AppImage.
 
 AppImage build
 --------------
 
-The preferred public Linux package is planned to be an AppImage. See:
+The preferred public Linux package is an AppImage. See:
 
     tools/README_APPIMAGE.md
     tools/download_appimage_tools.sh
