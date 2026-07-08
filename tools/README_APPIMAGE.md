@@ -1,6 +1,6 @@
 # Thumbnail me 4 AppImage build notes
 
-Internal build baseline: **4b2q / Beta 3**
+Internal build baseline: **4b2q / 4b3**
 
 The public Linux package should be an AppImage rather than one tarball per distribution.
 The lean tar.xz package remains useful as a fallback and for debugging, but it is not distro-independent.

@@ -1,4 +1,4 @@
-﻿# Thumbnail me 4 Beta 3
+# Thumbnail me 4b3
 
 Third public beta of Thumbnail me 4.
 
@@ -13,7 +13,7 @@ Third public beta of Thumbnail me 4.
 ## Changed
 
 - Synced Windows and Linux icon assets.
-- Updated Windows release packaging for the 4b2q / Beta 3 build line.
+- Updated Windows release packaging for the 4b2q / 4b3 build line.
 - AppImage-specific files are kept separate from the Windows portable package.
 
 ## Fixed

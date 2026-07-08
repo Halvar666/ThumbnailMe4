@@ -1,7 +1,7 @@
-Thumbnail me 4 Beta 3 - Windows x64 ZIP package
+Thumbnail me 4b3 - Windows x64 ZIP package
 ==========================================
 
-This package is a standalone Windows x64 ZIP build of Thumbnail me 4 Beta 3.
+This package is a standalone Windows x64 ZIP build of Thumbnail me 4b3.
 
 It is not a PortableApps.com / PAF package. It is simply a self-contained
 ZIP distribution with the required runtime DLLs and plugins placed next to
@@ -32,7 +32,7 @@ Notes:
   or source archive.
 
 Suggested release asset name:
-  ThumbnailMe4-Beta3-win64.zip
+  ThumbnailMe4-4b3-win64.zip
 
 Suggested GitHub release tag:
   v4b3
