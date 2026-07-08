@@ -123,6 +123,12 @@ if not exist "%OUTDIR%\avcodec-*.dll" (
 )
 
 echo.
+echo Removing files not wanted in portable ZIP...
+del /Q %OUTDIR%\d3dcompiler_47.dll >nul 2>nul
+del /Q %OUTDIR%\dxcompiler.dll >nul 2>nul
+del /Q %OUTDIR%\dxil.dll >nul 2>nul
+del /Q %OUTDIR%\vc_redist.x64.exe >nul 2>nul
+
 echo Creating ZIP:
 echo   "%ZIP_FILE%"
 

@@ -37,7 +37,7 @@ Suggested release asset name:
 Suggested GitHub release tag:
   v4b3
 
-Beta 3 notes
+4b3 notes
 ------------------------
 - This build uses an optimized FFmpeg runtime. It keeps broad input video support while removing unused output, network, device and program components.
 - DirectX shader compiler DLLs and the Visual C++ Redistributable installer are not bundled.
